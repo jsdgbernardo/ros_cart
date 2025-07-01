@@ -1,0 +1,36 @@
+[0.603s] Invoking command in '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build
+[0.803s] running develop
+[0.929s] Removing /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe-pose-ros2.egg-link (link to .)
+[0.948s] Invoked command in '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2' returned '0': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build
+[0.949s] Invoking command in '/home/jonathanb/ros_cart/src/mediapipe_pose_ros2': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/mediapipe_pose_ros2 build --build-base /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build install --record /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/install.log --single-version-externally-managed install_data --force
+[1.128s] running egg_info
+[1.128s] writing ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/PKG-INFO
+[1.129s] writing dependency_links to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/dependency_links.txt
+[1.129s] writing entry points to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/entry_points.txt
+[1.129s] writing requirements to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/requires.txt
+[1.129s] writing top-level names to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/top_level.txt
+[1.130s] reading manifest file '../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[1.150s] writing manifest file '../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[1.150s] running build
+[1.150s] running build_py
+[1.150s] creating /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build
+[1.150s] creating /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib
+[1.151s] creating /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2
+[1.151s] copying mediapipe_pose_ros2/__init__.py -> /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2
+[1.151s] copying mediapipe_pose_ros2/pose_node.py -> /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2
+[1.152s] running install
+[1.152s] running install_lib
+[1.152s] creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2
+[1.153s] copying /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2/__init__.py -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2
+[1.153s] copying /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2/pose_node.py -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2
+[1.153s] byte-compiling /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2/__init__.py to __init__.cpython-310.pyc
+[1.153s] byte-compiling /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2/pose_node.py to pose_node.cpython-310.pyc
+[1.154s] running install_data
+[1.154s] copying resource/mediapipe_pose_ros2 -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/ament_index/resource_index/packages
+[1.155s] copying package.xml -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/mediapipe_pose_ros2
+[1.155s] running install_egg_info
+[1.157s] Copying ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info to /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2-0.0.0-py3.10.egg-info
+[1.158s] running install_scripts
+[1.173s] Installing pose_node script to /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/mediapipe_pose_ros2
+[1.173s] writing list of installed files to '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/install.log'
+[1.188s] Invoked command in '/home/jonathanb/ros_cart/src/mediapipe_pose_ros2' returned '0': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/mediapipe_pose_ros2 build --build-base /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build install --record /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/install.log --single-version-externally-managed install_data --force

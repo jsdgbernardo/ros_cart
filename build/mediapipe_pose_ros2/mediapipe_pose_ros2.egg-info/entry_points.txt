@@ -1,0 +1,3 @@
+[console_scripts]
+pose_node = mediapipe_pose_ros2.pose_node:main
+

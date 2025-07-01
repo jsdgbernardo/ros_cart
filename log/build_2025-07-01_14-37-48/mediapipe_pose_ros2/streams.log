@@ -1,0 +1,24 @@
+[0.679s] Invoking command in '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build --no-deps symlink_data
+[0.872s] running develop
+[0.993s] running egg_info
+[0.993s] creating mediapipe_pose_ros2.egg-info
+[0.994s] writing mediapipe_pose_ros2.egg-info/PKG-INFO
+[0.994s] writing dependency_links to mediapipe_pose_ros2.egg-info/dependency_links.txt
+[0.994s] writing entry points to mediapipe_pose_ros2.egg-info/entry_points.txt
+[0.994s] writing requirements to mediapipe_pose_ros2.egg-info/requires.txt
+[0.994s] writing top-level names to mediapipe_pose_ros2.egg-info/top_level.txt
+[0.994s] writing manifest file 'mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[0.995s] reading manifest file 'mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[0.996s] writing manifest file 'mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[0.997s] running build_ext
+[0.998s] Creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe-pose-ros2.egg-link (link to .)
+[0.998s] Installing pose_node script to /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/mediapipe_pose_ros2
+[0.999s] 
+[0.999s] Installed /home/jonathanb/ros_cart/build/mediapipe_pose_ros2
+[0.999s] running symlink_data
+[0.999s] creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/ament_index
+[0.999s] creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/ament_index/resource_index
+[0.999s] creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/ament_index/resource_index/packages
+[1.000s] symbolically linking /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/resource/mediapipe_pose_ros2 -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/ament_index/resource_index/packages
+[1.000s] symbolically linking /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/package.xml -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/mediapipe_pose_ros2
+[1.022s] Invoked command in '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2' returned '0': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build --no-deps symlink_data

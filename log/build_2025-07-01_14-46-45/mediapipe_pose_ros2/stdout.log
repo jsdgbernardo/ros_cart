@@ -1,0 +1,32 @@
+running develop
+Removing /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe-pose-ros2.egg-link (link to .)
+running egg_info
+writing ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/PKG-INFO
+writing dependency_links to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/dependency_links.txt
+writing entry points to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/entry_points.txt
+writing requirements to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/requires.txt
+writing top-level names to ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/top_level.txt
+reading manifest file '../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/SOURCES.txt'
+writing manifest file '../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build
+creating /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib
+creating /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2
+copying mediapipe_pose_ros2/__init__.py -> /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2
+copying mediapipe_pose_ros2/pose_node.py -> /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2
+running install
+running install_lib
+creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2
+copying /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2/__init__.py -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2
+copying /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build/lib/mediapipe_pose_ros2/pose_node.py -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2
+byte-compiling /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2/pose_node.py to pose_node.cpython-310.pyc
+running install_data
+copying resource/mediapipe_pose_ros2 -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/ament_index/resource_index/packages
+copying package.xml -> /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/share/mediapipe_pose_ros2
+running install_egg_info
+Copying ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info to /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe_pose_ros2-0.0.0-py3.10.egg-info
+running install_scripts
+Installing pose_node script to /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/mediapipe_pose_ros2
+writing list of installed files to '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/install.log'
