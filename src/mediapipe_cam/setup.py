@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'pose_node = mediapipe_cam.pose_node:main',
+            'phone_cam_node = mediapipe_cam.phone_cam_node:main'
         ],
     },
 )
