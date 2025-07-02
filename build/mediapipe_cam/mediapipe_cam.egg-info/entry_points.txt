@@ -1,3 +1,0 @@
-[console_scripts]
-phone_cam_node = mediapipe_cam.phone_cam_node:main
-

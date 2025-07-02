@@ -1,9 +1,0 @@
-source;share/mediapipe_cam/hook/pythonpath.ps1
-source;share/mediapipe_cam/hook/pythonpath.dsv
-source;share/mediapipe_cam/hook/pythonpath.sh
-source;share/mediapipe_cam/hook/ament_prefix_path.ps1
-source;share/mediapipe_cam/hook/ament_prefix_path.dsv
-source;share/mediapipe_cam/hook/ament_prefix_path.sh
-source;../../build/mediapipe_cam/share/mediapipe_cam/hook/pythonpath_develop.ps1
-source;../../build/mediapipe_cam/share/mediapipe_cam/hook/pythonpath_develop.dsv
-source;../../build/mediapipe_cam/share/mediapipe_cam/hook/pythonpath_develop.sh

@@ -1,9 +1,0 @@
-source;share/mediapipe_pose_ros2/hook/pythonpath.ps1
-source;share/mediapipe_pose_ros2/hook/pythonpath.dsv
-source;share/mediapipe_pose_ros2/hook/pythonpath.sh
-source;share/mediapipe_pose_ros2/hook/ament_prefix_path.ps1
-source;share/mediapipe_pose_ros2/hook/ament_prefix_path.dsv
-source;share/mediapipe_pose_ros2/hook/ament_prefix_path.sh
-source;../../build/mediapipe_pose_ros2/share/mediapipe_pose_ros2/hook/pythonpath_develop.ps1
-source;../../build/mediapipe_pose_ros2/share/mediapipe_pose_ros2/hook/pythonpath_develop.dsv
-source;../../build/mediapipe_pose_ros2/share/mediapipe_pose_ros2/hook/pythonpath_develop.sh
