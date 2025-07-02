@@ -1,0 +1,15 @@
+running develop
+running egg_info
+writing mediapipe_cam.egg-info/PKG-INFO
+writing dependency_links to mediapipe_cam.egg-info/dependency_links.txt
+writing entry points to mediapipe_cam.egg-info/entry_points.txt
+writing requirements to mediapipe_cam.egg-info/requires.txt
+writing top-level names to mediapipe_cam.egg-info/top_level.txt
+reading manifest file 'mediapipe_cam.egg-info/SOURCES.txt'
+writing manifest file 'mediapipe_cam.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/jonathanb/ros_cart/install/mediapipe_cam/lib/python3.10/site-packages/mediapipe-cam.egg-link (link to .)
+Installing pose_node script to /home/jonathanb/ros_cart/install/mediapipe_cam/lib/mediapipe_cam
+
+Installed /home/jonathanb/ros_cart/build/mediapipe_cam
+running symlink_data

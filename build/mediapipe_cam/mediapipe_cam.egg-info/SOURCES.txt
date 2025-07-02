@@ -10,3 +10,4 @@ mediapipe_cam.egg-info/entry_points.txt
 mediapipe_cam.egg-info/requires.txt
 mediapipe_cam.egg-info/top_level.txt
 mediapipe_cam.egg-info/zip-safe
+resource/mediapipe_cam

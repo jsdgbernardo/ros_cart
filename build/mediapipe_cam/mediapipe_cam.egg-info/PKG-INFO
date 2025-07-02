@@ -1,11 +1,11 @@
 Metadata-Version: 2.1
 Name: mediapipe-cam
-Version: 0.0.1
-Summary: ROS 2 node to stream from phone camera using IP Webcam for MediaPipe input
+Version: 0.0.0
+Summary: Publishes camera data from phone
 Home-page: UNKNOWN
-Maintainer: your_name
-Maintainer-email: your_email@example.com
-License: MIT
+Maintainer: jsdgbernardo
+Maintainer-email: bernardojonathansimon@gmail.com
+License: License
 Platform: UNKNOWN
 
 UNKNOWN

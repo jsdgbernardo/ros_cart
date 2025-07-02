@@ -1,0 +1,16 @@
+[0.815s] Invoking command in '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build --no-deps
+[1.057s] running develop
+[1.239s] running egg_info
+[1.240s] writing mediapipe_pose_ros2.egg-info/PKG-INFO
+[1.240s] writing dependency_links to mediapipe_pose_ros2.egg-info/dependency_links.txt
+[1.240s] writing entry points to mediapipe_pose_ros2.egg-info/entry_points.txt
+[1.240s] writing requirements to mediapipe_pose_ros2.egg-info/requires.txt
+[1.240s] writing top-level names to mediapipe_pose_ros2.egg-info/top_level.txt
+[1.241s] reading manifest file 'mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[1.242s] writing manifest file 'mediapipe_pose_ros2.egg-info/SOURCES.txt'
+[1.243s] running build_ext
+[1.243s] Creating /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages/mediapipe-pose-ros2.egg-link (link to .)
+[1.245s] Installing pose_node script to /home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/mediapipe_pose_ros2
+[1.246s] 
+[1.246s] Installed /home/jonathanb/ros_cart/build/mediapipe_pose_ros2
+[1.272s] Invoked command in '/home/jonathanb/ros_cart/build/mediapipe_pose_ros2' returned '0': PYTHONPATH=/home/jonathanb/ros_cart/build/mediapipe_pose_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/jonathanb/ros_cart/install/mediapipe_pose_ros2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/jonathanb/ros_cart/build/mediapipe_pose_ros2/build --no-deps
