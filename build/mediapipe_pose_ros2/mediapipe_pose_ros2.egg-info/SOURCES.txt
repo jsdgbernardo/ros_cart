@@ -9,9 +9,6 @@ setup.py
 ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/top_level.txt
 ../../build/mediapipe_pose_ros2/mediapipe_pose_ros2.egg-info/zip-safe
 mediapipe_pose_ros2/__init__.py
-mediapipe_pose_ros2/camera.py
-mediapipe_pose_ros2/node.py
-mediapipe_pose_ros2/pose.py
 mediapipe_pose_ros2/pose_node.py
 mediapipe_pose_ros2.egg-info/PKG-INFO
 mediapipe_pose_ros2.egg-info/SOURCES.txt

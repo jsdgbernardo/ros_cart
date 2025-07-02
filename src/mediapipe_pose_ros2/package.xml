@@ -4,7 +4,7 @@
   <name>mediapipe_pose_ros2</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="bernardojonathansimon@gmail.com">jonathanb</maintainer>
+  <maintainer email="bernardojonathansimon@gmail.com">jssgbernardo</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>

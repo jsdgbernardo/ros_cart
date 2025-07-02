@@ -8,8 +8,8 @@ setup(
     packages=[package_name],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='your_name',
-    maintainer_email='you@example.com',
+    maintainer='jsdgbernardo',
+    maintainer_email='bernardojonathansimon@gmail.com',
     description='ROS 2 node that integrates MediaPipe Pose estimation.',
     entry_points={
         'console_scripts': [
