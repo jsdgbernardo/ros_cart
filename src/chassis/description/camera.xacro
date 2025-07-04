@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <joint name="stick_joint" type="fixed">
+        <parent link="chassis_link"/>
+        <child link="stick_link"/>
+        <origin xyz="0.01 0 0.45" rpy="0 0 0"/>
+    </joint>
+
+    <link name="stick_link">
+        <visual>
+            <geometry>
+                <box size="0.02 0.02 0.9"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+    </link>
+
+    <!-- CAMERA -->
+
+    <joint name="camera_joint" type="fixed">
+        <parent link="stick_link"/>
+        <child link="camera_link"/>
+        <origin xyz="0.01 0 0.45" rpy="0 0 0"/>
+    </joint>
+
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="0.0076 0.1574 0.0758"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+    </link>
+
+</robot>
