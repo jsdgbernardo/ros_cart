@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+     <xacro:include filename="inertial_macros.xacro"/>
+
     <joint name="stick_joint" type="fixed">
         <parent link="chassis_link"/>
         <child link="stick_link"/>
@@ -14,6 +16,9 @@
             </geometry>
             <material name="black"/>
         </visual>
+        <xacro:inertial_box mass="0.1" x="0.02" y="0.02" z="0.9">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box>
     </link>
 
     <!-- CAMERA -->
@@ -31,6 +36,42 @@
             </geometry>
             <material name="red"/>
         </visual>
+        <xacro:inertial_box mass="0.2" x="0.0076" y="0.1574" z="0.0758">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box>
     </link>
+
+    <joint name="camera_optical_joint" type="fixed">
+        <parent link="camera_link"/>
+        <child link="camera_optical_link"/>
+        <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    </joint>
+
+    <link name="camera_optical_link"></link>
+
+    <gazebo reference="camera_link">
+        <material>Gazebo/Red</material>
+
+        <sensor name="camera" type="camera">
+            <update_rate>10</update_rate>
+            <visualize>true</visualize>
+            <camera>
+                <camera_info_topic>camera/camera_info</camera_info_topic>
+                <horizontal_fov>1.0472</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                    <format>R8G8B8</format>
+                </image>
+                <clip>
+                    <near>0.05</near>
+                    <far>8.0</far>
+                </clip>
+            </camera>
+            <topic>camera/image_raw</topic>
+            <gz_frame_id>camera_optical_link</gz_frame_id>
+        </sensor>
+    
+    </gazebo>
 
 </robot>

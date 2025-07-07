@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <xacro:include filename="inertial_macros.xacro"/>
+
     <!-- LIDAR -->
 
     <joint name="lidar_joint" type="fixed">
@@ -16,6 +18,36 @@
             </geometry>
             <material name="red"/>
         </visual>
+        <xacro:inertial_cylinder mass="0.140" length="0.025" radius="0.035">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
     </link>
+
+    <gazebo reference="lidar_link">
+        <material>Gazebo/Red</material>
+
+        <sensor name="lidar_sensor" type="gpu_lidar">
+            <update_rate>10</update_rate>
+            <visualize>true</visualize>
+            <lidar>
+                <scan>
+                    <horizontal>
+                        <samples>360</samples>
+                        <resolution>1</resolution>
+                        <min_angle>-3.14159</min_angle>
+                        <max_angle>3.14159</max_angle>
+                    </horizontal>
+                </scan>
+                <range>
+                    <min>0.1</min>
+                    <max>10.0</max>
+                    <!-- <resolution>0.01</resolution> -->
+                </range>
+            </lidar>
+            <topic>scan</topic>
+            <gz_frame_id>lidar_link</gz_frame_id>
+        </sensor>
+
+    </gazebo>
 
 </robot>

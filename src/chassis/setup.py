@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         (os.path.join('share', package_name, 'description'), glob('description/*.xacro')),
+        (os.path.join('share', package_name, 'worlds'), glob('worlds/*.world')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
