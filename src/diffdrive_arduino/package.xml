@@ -10,6 +10,8 @@
   <depend>rclpy</depend>
   <depend>ros2_control</depend>
   <depend>controller_manager</depend>
+  <depend>pyserial</depend>
+  <depend>diff_drive_controller</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
