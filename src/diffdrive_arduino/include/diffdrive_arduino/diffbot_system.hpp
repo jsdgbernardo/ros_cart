@@ -47,11 +47,15 @@ struct Config
   std::string device = "";
   int baud_rate = 0;
   int timeout_ms = 0;
-  int enc_counts_per_rev = 0;
-  int pid_p = 0;
-  int pid_d = 0;
-  int pid_i = 0;
-  int pid_o = 0;
+  // int enc_counts_per_rev = 0;
+  int ppr_left = 0;
+  int ppr_right = 0;
+  int wheel_radius = 0;
+  int wheel_separation = 0;
+  // int pid_p = 0;
+  // int pid_d = 0;
+  // int pid_i = 0;
+  // int pid_o = 0;
 };
 
 

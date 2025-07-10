@@ -10,7 +10,7 @@ class Wheel
     public:
 
     std::string name = "";
-    int enc = 0;
+    // int enc = 0;
     double cmd = 0;
     double pos = 0;
     double vel = 0;
@@ -30,10 +30,10 @@ class Wheel
       rads_per_count = (2*M_PI)/counts_per_rev;
     }
 
-    double calc_enc_angle()
-    {
-      return enc * rads_per_count;
-    }
+    // double calc_enc_angle()
+    // {
+    //   return enc * rads_per_count;
+    // }
 
 
 

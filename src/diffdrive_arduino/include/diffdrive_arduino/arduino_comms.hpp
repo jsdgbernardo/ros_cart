@@ -6,6 +6,7 @@
 // #include <cstdlib>
 #include <libserial/SerialPort.h>
 #include <iostream>
+#include <cmath>
 
 
 LibSerial::BaudRate convert_baud_rate(int baud_rate)
@@ -79,27 +80,69 @@ public:
   }
 
 
-  void send_empty_msg()
+  // void send_empty_msg()
+  // {
+  //   std::string response = send_msg("\r");
+  // }
+
+  void read_encoder_values(double &pos_left, double &vel_left, double &pos_right, double &vel_right)
   {
-    std::string response = send_msg("\r");
+    std::string response;
+    serial_conn_.FlushIOBuffers(); // Just in case
+    serial_conn_.ReadLine(response, '\n', timeout_ms_);
+
+    std::istringstream iss(response);
+    std::string token;
+
+    std::getline(iss, token, ' ');
+    pos_left = std::atof(token.c_str());
+    std::getline(iss, token, ' ');
+    vel_left = std::atof(token.c_str());
+    std::getline(iss, token, ' ');
+    pos_right = std::atof(token.c_str());
+    std::getline(iss, token, ' ');
+    vel_right = std::atof(token.c_str());
+
+    // std::string delimiter = " ";
+    // size_t del_pos = response.find(delimiter);
+    // std::string token_1 = response.substr(0, del_pos);
+    // std::string token_2 = response.substr(del_pos + delimiter.length());
+    // del_pos = token_2.find(delimiter);
+    // std::string token_3 = token_2.substr(0, del_pos);
+    // std::string token_4 = token_2.substr(del_pos + delimiter.length());
+
+    // pos_left = std::atof(token_1.c_str());
+    // vel_left = std::atof(token_3.c_str());
+    // pos_right = std::atof(token_2.c_str());
+    // vel_right = std::atof(token_4.c_str());
   }
+  // {
+  //   std::string response = send_msg("e\r");
 
-  void read_encoder_values(int &val_1, int &val_2)
+  //   std::string delimiter = " ";
+  //   size_t del_pos = response.find(delimiter);
+  //   std::string token_1 = response.substr(0, del_pos);
+  //   std::string token_2 = response.substr(del_pos + delimiter.length());
+
+  //   val_1 = std::atoi(token_1.c_str());
+  //   val_2 = std::atoi(token_2.c_str());
+  // }
+  void set_motor_values(double v_left, double v_right)
   {
-    std::string response = send_msg("e\r");
+    // Converting to RPM
+    double rpm_left = (v_left / (2 * M_PI)) * 60.0;
+    double rpm_right = (v_right / (2 * M_PI)) * 60.0; 
 
-    std::string delimiter = " ";
-    size_t del_pos = response.find(delimiter);
-    std::string token_1 = response.substr(0, del_pos);
-    std::string token_2 = response.substr(del_pos + delimiter.length());
+    // Determining direction and positive RPM values
+    int dir_left = (rpm_left > 0) ? 1 : 0;
+    int dir_right = (rpm_right > 0) ? 1 : 0;
 
-    val_1 = std::atoi(token_1.c_str());
-    val_2 = std::atoi(token_2.c_str());
-  }
-  void set_motor_values(int val_1, int val_2)
-  {
+    rpm_left = std::abs(rpm_left);
+    rpm_right = std::abs(rpm_right);
+
+    // Constructing the command string
     std::stringstream ss;
-    ss << "m " << val_1 << " " << val_2 << "\r";
+    ss << rpm_left << " " << dir_left << " " << rpm_right << " " << dir_right << "\r";
     send_msg(ss.str());
   }
 

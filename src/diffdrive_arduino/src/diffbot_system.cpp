@@ -42,7 +42,10 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   cfg_.device = info_.hardware_parameters["device"];
   cfg_.baud_rate = std::stoi(info_.hardware_parameters["baud_rate"]);
   cfg_.timeout_ms = std::stoi(info_.hardware_parameters["timeout_ms"]);
-  cfg_.enc_counts_per_rev = std::stoi(info_.hardware_parameters["enc_counts_per_rev"]);
+  // cfg_.enc_counts_per_rev = std::stoi(info_.hardware_parameters["enc_counts_per_rev"]);
+  cfg_.wheel_separation = std::stoi(info_.hardware_parameters["wheel_separation"]);
+  cfg_.wheel_radius = std::stoi(info_.hardware_parameters["wheel_radius"]);
+
 //   if (info_.hardware_parameters.count("pid_p") > 0)
 //   {
 //     cfg_.pid_p = std::stoi(info_.hardware_parameters["pid_p"]);
@@ -56,8 +59,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
 //   }
   
 
-  wheel_l_.setup(cfg_.left_wheel_name, cfg_.enc_counts_per_rev);
-  wheel_r_.setup(cfg_.right_wheel_name, cfg_.enc_counts_per_rev);
+  wheel_l_.setup(cfg_.left_wheel_name, cfg_.ppr_left);
+  wheel_r_.setup(cfg_.right_wheel_name, cfg_.ppr_right);
 
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
@@ -204,24 +207,26 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_deactivate(
 }
 
 hardware_interface::return_type DiffDriveArduinoHardware::read(
-  const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
+  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   if (!comms_.connected())
   {
     return hardware_interface::return_type::ERROR;
   }
 
-  comms_.read_encoder_values(wheel_l_.enc, wheel_r_.enc);
+  comms_.read_encoder_values(wheel_l_.pos, wheel_l_.vel, wheel_r_.pos, wheel_r_.vel);
 
-  double delta_seconds = period.seconds();
+  // double delta_seconds = period.seconds();
 
-  double pos_prev = wheel_l_.pos;
-  wheel_l_.pos = wheel_l_.calc_enc_angle();
-  wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
+  // double pos_prev = wheel_l_.pos;
+  // wheel_l_.pos = wheel_l_.calc_enc_angle();
+  // wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
 
-  pos_prev = wheel_r_.pos;
-  wheel_r_.pos = wheel_r_.calc_enc_angle();
-  wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
+  // pos_prev = wheel_r_.pos;
+  // wheel_r_.pos = wheel_r_.calc_enc_angle();
+  // wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
+
+  
 
   return hardware_interface::return_type::OK;
 }
@@ -234,9 +239,10 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
     return hardware_interface::return_type::ERROR;
   }
 
-  int motor_l_counts_per_loop = wheel_l_.cmd / wheel_l_.rads_per_count / cfg_.loop_rate;
-  int motor_r_counts_per_loop = wheel_r_.cmd / wheel_r_.rads_per_count / cfg_.loop_rate;
-  comms_.set_motor_values(motor_l_counts_per_loop, motor_r_counts_per_loop);
+  // int motor_l_counts_per_sec = wheel_l_.cmd / wheel_l_.rads_per_count;
+  // int motor_r_counts_per_sec = wheel_r_.cmd / wheel_r_.rads_per_count;
+
+  comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
   return hardware_interface::return_type::OK;
 }
 
