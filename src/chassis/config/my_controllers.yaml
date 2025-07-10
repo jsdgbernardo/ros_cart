@@ -18,23 +18,21 @@ diff_cont:
 
     left_wheel_names: ['left_wheel_joint']
     right_wheel_names: ['right_wheel_joint']
-    wheel_separation: 0.192
+    wheel_separation: 0.18448
     wheel_radius: 0.035
 
-    use_stamped_vel: false
-
-    # open_loop: false    
+    use_stamped_vel: false # use stamped velocity commands for Nav2 
 
     # wheels_per_side: x
     # wheel_separation_multiplier: x
     # left_wheel_radius_multiplier: x
     # right_wheel_radius_multiplier: x
 
-    # odom_frame_id: odom
+    odom_frame_id: odom
     # pose_covariance_diagonal: x
     # twist_covariance_diagonal: x
-    # open_loop: x
-    # enable_odom_tf: x
+    open_loop: true
+    enable_odom_tf: true
 
     cmd_vel_timeout: 0.25
     # publish_limited_velocity: x
