@@ -44,10 +44,10 @@ def generate_launch_description():
     #     )
 
     
-    robot_description_content = Command(['xacro ', os.path.join(
+    robot_description = Command(['xacro ', os.path.join(
         get_package_share_directory(package_name), 'description', 'chassis.urdf.xacro')])
 
-    robot_description = {'robot_description': robot_description_content}
+    # robot_description = {'robot_description': robot_description_content}
 
     controller_params_file = os.path.join(get_package_share_directory(package_name),'config','my_controllers.yaml')
 
@@ -61,14 +61,14 @@ def generate_launch_description():
 
     delayed_controller_manager = TimerAction(period=3.0, actions=[controller_manager])
 
-    robot_state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        output='both',
-        parameters=[robot_description],
-    )
+    # robot_state_publisher = Node(
+    #     package="robot_state_publisher",
+    #     executable="robot_state_publisher",
+    #     output='both',
+    #     parameters=[robot_description],
+    # )
 
-    delayed_robot_state_publisher = TimerAction(period=3.0, actions=[robot_state_publisher])
+    # delayed_robot_state_publisher = TimerAction(period=3.0, actions=[robot_state_publisher])
 
     diff_drive_spawner = Node(
         package="controller_manager",
@@ -121,7 +121,7 @@ def generate_launch_description():
         # joystick,
         # twist_mux,
         delayed_controller_manager,
-        delayed_robot_state_publisher,
+        # delayed_robot_state_publisher,
         delayed_diff_drive_spawner,
         delayed_joint_broad_spawner
     ])

@@ -150,6 +150,13 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_configure(
   {
     comms_.disconnect();
   }
+
+  RCLCPP_INFO(
+    rclcpp::get_logger("DiffDriveArduinoHardware"),
+    "Connecting to device: %s at baud rate: %d (timeout: %d ms)",
+    cfg_.device.c_str(), cfg_.baud_rate, cfg_.timeout_ms);
+
+  
   comms_.connect(cfg_.device, cfg_.baud_rate, cfg_.timeout_ms);
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully configured!");
 
