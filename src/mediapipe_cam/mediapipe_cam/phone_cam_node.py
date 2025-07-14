@@ -7,10 +7,11 @@ import numpy as np
 class PhoneCamNode(Node):
     def __init__(self):
         super().__init__('phone_cam_node')
+
         # Publisher for CompressedImage
         self.publisher = self.create_publisher(CompressedImage, '/camera/image/compressed', 10)
 
-        self.stream_url = 'http://192.168.0.220:8080/video'  # Change to your phone IP
+        self.stream_url = 'http://192.168.0.220:8080/video'  # Change to phone IP
         self.cap = cv2.VideoCapture(self.stream_url)
 
         if not self.cap.isOpened():

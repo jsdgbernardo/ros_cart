@@ -100,18 +100,18 @@ class PoseEstimationNode(Node):
             pose_msg.header.stamp = self.get_clock().now().to_msg()
             pose_msg.header.frame_id = 'map'  # or 'odom' if that's your sim frame
 
-            # Simulated position; ------------- update later with dynamic data   ----------------
-            pose_msg.pose.position.x = 2.0
-            pose_msg.pose.position.y = 3.0
-            pose_msg.pose.position.z = 0.0
+            # # Simulated position; ----------------------------- update later with dynamic data   ------------------------------
+            # pose_msg.pose.position.x = 2.0
+            # pose_msg.pose.position.y = 3.0
+            # pose_msg.pose.position.z = 0.0
 
             # Convert body angle to quaternion
             body_angle_rad = np.deg2rad(body_angle)
             quat = self.yaw_to_quaternion(body_angle_rad)
             pose_msg.pose.orientation = quat
 
-            self.pose_pub.publish(pose_msg)
-            self.get_logger().info(f'Published /user/pose at (2.0, 3.0), yaw: {body_angle:.1f}°')
+            # self.pose_pub.publish(pose_msg)
+            # self.get_logger().info(f'Published /user/pose at (2.0, 3.0), yaw: {body_angle:.1f}°')
 
         except IndexError:
             self.get_logger().warn("Required landmarks not found.")
