@@ -9,22 +9,6 @@ class product():
         self.probability = probability
         self.coordinates = coordinates
 
-# class item_relations():
-#     def __init__(self, items):
-#         self.items = items
-#         self.relations = pd.DataFrame(index=items, columns=items, data=pd.NA)
-
-#     def add_relation(self, item2, item2, score):
-#         if item1 in self.items and item2 in self.items:
-#             self.relations.at[item1, item2] = score
-#             self.relations.at[item2, item1] = score
-
-#     def get_relation(self, item1, item2):
-#         if item1 in self.items and item2 in self.items:
-#             return self.relations.at[item1, item2]
-#         else:
-#             return None
-
 class PredictionNode(Node):
     def __init__(self):
         super().__init__('prediction_node')    

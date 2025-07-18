@@ -80,17 +80,29 @@ class PoseEstimationNode(Node):
             # --- Head Yaw Estimation (Eyes) ---
             left_eye = lm[2]
             right_eye = lm[5]
-            dx = right_eye.x - left_eye.x
-            dy = right_eye.y - left_eye.y
-            yaw = np.arctan2(dy, dx) * 180.0 / np.pi
+            eye_center_x = (left_eye.x + right_eye.x) / 2.0
+            offset = nose.x - eye_center_x
+            eye_distance = abs(right_eye.x - left_eye.x)
+            if eye_distance > 0.01:
+                normalized_offset = offset / eye_distance
+            else:
+                normalized_offset = 0.0
+            normalized_offset = max(min(normalized_offset, 2.0), -2.0)
+            yaw = -normalized_offset * 90.0
+            # Clamp to [-180, 180]
+            yaw = ((yaw + 180) % 360) - 180
+
+            # dx = right_eye.x - left_eye.x
+            # dy = right_eye.y - left_eye.y
+            # yaw = np.arctan2(dy, dx) * 180.0 / np.pi
             self.yaw_pub.publish(Float32(data=yaw))
             self.get_logger().info(f'Head Yaw: {yaw:.1f}°')
 
             # --- Body Orientation (Shoulders) ---
             left_shoulder = lm[11]
             right_shoulder = lm[12]
-            sdx = right_shoulder.x - left_shoulder.x
-            sdy = right_shoulder.y - left_shoulder.y
+            sdx = left_shoulder.x - right_shoulder.x
+            sdy = left_shoulder.y - right_shoulder.y
             body_angle = np.arctan2(sdy, sdx) * 180.0 / np.pi
             self.body_pub.publish(Float32(data=body_angle))
             self.get_logger().info(f'Body Angle: {body_angle:.1f}°')
