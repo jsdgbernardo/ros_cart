@@ -224,8 +224,6 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   // wheel_r_.pos = wheel_r_.calc_enc_angle();
   // wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
 
-  
-
   return hardware_interface::return_type::OK;
 }
 

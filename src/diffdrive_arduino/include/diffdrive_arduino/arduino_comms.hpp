@@ -86,7 +86,7 @@ public:
   // }
 
   void read_encoder_values(double &pos_left, double &vel_left, double &pos_right, double &vel_right)
-  {
+  {    
     std::string response;
     serial_conn_.FlushIOBuffers(); // Just in case
     serial_conn_.ReadLine(response, '\n', timeout_ms_);

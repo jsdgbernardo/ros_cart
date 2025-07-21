@@ -74,6 +74,7 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=["diff_cont"],
+        remappings=[( "/odom","/diff_cont/odom")],
     )
 
     delayed_diff_drive_spawner = RegisterEventHandler(
