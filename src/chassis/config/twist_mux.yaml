@@ -3,6 +3,6 @@ twist_mux:
     topics:
       navigation:
         topics:
-          - /cmd_vel
+          - cmd_vel
         timeout: 0.5
         priority: 10
