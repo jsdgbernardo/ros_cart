@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
-from nav2_msgs.srv import ComputePathToPose
+from rclpy.action import ActionClient
+from nav2_msgs.action import ComputePathToPose
 from geometry_msgs.msg import PoseStamped, Point, PoseWithCovarianceStamped
 from std_msgs.msg import String, Float32
 import math
@@ -51,7 +52,7 @@ class PredictionNode(Node):
         )
 
         # Service client for ComputePathToPose
-        self.client = self.create_client(ComputePathToPose, '/compute_path_to_pose')
+        self._action_client = ActionClient(self, ComputePathToPose, 'compute_path_to_pose')
 
         # Subscription to AMCL pose
         self.current_pose = None
@@ -70,13 +71,16 @@ class PredictionNode(Node):
             self.head_yaw_callback,
             10
         )
+        
+        # Publish navigational goal
+        self.goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
 
         # Create a timer to periodically compute probabilities
         self.timer = self.create_timer(1.0, self.compute_probability)
-        
-        # Publish navigational goal
 
     def compute_probability(self):
+
+        self.get_logger().info('Computing probabilities...')
 
         path_lengths = {}
         total_length = 0.0
@@ -105,6 +109,32 @@ class PredictionNode(Node):
             posterior = numerator / evidence if evidence > 0 else 0.0
             item.probability = posterior
 
+        best_item = max(self.items, key=lambda x: x.probability)
+
+        goal_msg = ComputePathToPose.Goal()
+        goal_pose = PoseStamped()
+        goal_pose.header.frame_id = 'map'
+        goal_pose.header.stamp = self.get_clock().now().to_msg()
+        goal_pose.pose.position = best_item.coordinates
+        goal_pose.pose.orientation.w = 1.0
+
+        goal_msg.goal = goal_pose
+        goal_msg.planner_id = ''
+        goal_msg.use_start = False
+
+        # Wait for the action server to be ready
+        self.get_logger().info('Waiting for ComputePathToPose action server...')
+        self._action_client.wait_for_server()
+        self.get_logger().info('ComputePathToPose action server is ready.')
+
+        # Send goal and attach callbacks
+        future = self._action_client.send_goal_async(
+            goal_msg,
+            feedback_callback=self.feedback_callback
+        )
+        future.add_done_callback(self.goal_response_callback)
+        self.get_logger().info(f'Best item: {best_item.name} with probability: {best_item.probability:.4f}')
+
     def get_relation(self, item1, item2):
         try:
             return self.df.loc[item1, item2]
@@ -116,11 +146,15 @@ class PredictionNode(Node):
         name = msg.data
         if name not in self.held_items:
             self.held_items.append(name)
+        self.get_logger().info(f'Held items updated: {self.held_items}')
 
     def held_items_likelihood(self, item, alpha=1.0):
         # Compute the likelihood of the held items given the item
         if len(self.held_items) == 0:
             return 1.0
+
+        if item.name in self.held_items:
+            return 0.0
 
         scores = []
         for held_item in self.held_items:
@@ -142,6 +176,7 @@ class PredictionNode(Node):
 
     def pose_callback(self, msg):
         self.current_pose = msg.pose.pose
+        self.get_logger().info(f'Current pose updated: {self.current_pose.position.x}, {self.current_pose.position.y}')
 
     # Compute the path length to a given (x, y) coordinate
     def compute_path_to(self, x, y):
@@ -150,17 +185,19 @@ class PredictionNode(Node):
         goal_pose.pose.position = Point(x=x, y=y, z=0.0)
         goal_pose.pose.orientation.w = 1.0
 
-        req = ComputePathToPose.Request()
-        req.goal = goal_pose
+        goal_msg = ComputePathToPose.Goal()
+        goal_msg.goal = goal_pose
         
         if self.current_pose is not None:
-            req.start.header.frame_id = 'map'
-            req.start.pose = self.current_pose
+            goal_msg.start.header.frame_id = 'map'
+            goal_msg.start.pose = self.current_pose
         else:
             self.get_logger().warn("Current robot pose not available.")
             return None, float('inf')
 
-        future = self.client.call_async(req)
+        self._action_client.wait_for_server()
+        future = self._action_client.send_goal_async(goal_msg)
+
         rclpy.spin_until_future_complete(self, future, timeout_sec=1.0)
 
         if future.result() is not None:
@@ -182,6 +219,7 @@ class PredictionNode(Node):
 
     def head_yaw_callback(self, msg):
         self.head_yaw = msg.data
+        self.get_logger().info(f'Head yaw updated: {self.head_yaw}')
 
     def compute_gaze_alignment_score_with_path(self, item):
         if self.head_yaw is None or self.current_pose is None:

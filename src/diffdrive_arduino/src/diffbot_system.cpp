@@ -44,6 +44,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   cfg_.timeout_ms = std::stoi(info_.hardware_parameters["timeout_ms"]);
   cfg_.wheel_separation = std::stoi(info_.hardware_parameters["wheel_separation"]);
   cfg_.wheel_radius = std::stoi(info_.hardware_parameters["wheel_radius"]);
+  cfg_.ppr_left = std::stod(info_.hardware_parameters["ppr_left"]);
+  cfg_.ppr_right = std::stod(info_.hardware_parameters["ppr_right"]);
 
 //   if (info_.hardware_parameters.count("pid_p") > 0)
 //   {
