@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'prediction_node = prediction.prediction_node:main',
         ],
     },
 )
