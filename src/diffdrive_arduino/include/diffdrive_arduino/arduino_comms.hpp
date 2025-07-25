@@ -140,6 +140,10 @@ public:
     rpm_left = std::abs(rpm_left);
     rpm_right = std::abs(rpm_right);
 
+    // Minimum RPM
+    if (rpm_left < 200) rpm_left = 200;
+    if (rpm_right < 200) rpm_right = 200;
+
     // Constructing the command string
     std::stringstream ss;
     ss << rpm_left << " " << dir_left << " " << rpm_right << " " << dir_right << "\r";

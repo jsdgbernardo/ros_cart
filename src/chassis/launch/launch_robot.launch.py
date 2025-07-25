@@ -28,15 +28,20 @@ def generate_launch_description():
                 )]), launch_arguments={'use_sim_time': 'false', 'use_ros2_control': 'true'}.items()
     )
 
-    # twist_mux_params = os.path.join(get_package_share_directory(package_name),'config','twist_mux.yaml')
-    # twist_mux = Node(
-    #         package="twist_mux",
-    #         executable="twist_mux",
-    #         parameters=[twist_mux_params],
-    #         remappings=[('/cmd_vel_out','/diff_cont/cmd_vel_unstamped')]
-    #     )
+    twist_mux_params = os.path.join(get_package_share_directory(package_name),'config','twist_mux.yaml')
+    twist_mux = Node(
+            package="twist_mux",
+            executable="twist_mux",
+            parameters=[twist_mux_params],
+            remappings=[('/cmd_vel_out','/diff_cont/cmd_vel_unstamped')]
+        )
 
-    
+    lidar = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory(package_name), 'launch', 'rplidar.launch.py'
+        )])
+    )
+
     robot_description = Command(['xacro ', os.path.join(
         get_package_share_directory(package_name), 'description', 'chassis.urdf.xacro')])
 
@@ -112,7 +117,8 @@ def generate_launch_description():
     # Launch them all!
     return LaunchDescription([
         rsp,
-        # twist_mux,
+        twist_mux,
+        lidar,
         delayed_controller_manager,
         # delayed_robot_state_publisher,
         delayed_diff_drive_spawner,

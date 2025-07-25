@@ -21,19 +21,19 @@ class PredictionNode(Node):
         
         self.items = [] # list of item objects
 
-        self.items.append(product('Bottled Water', 1, Point(x=1.0, y=2.0, z=0.0)))
-        self.items.append(product('Milk', 1, Point(x=2.0, y=3.0, z=0.0)))
-        self.items.append(product('Dessert', 1, Point(x=3.0, y=4.0, z=0.0)))
-        self.items.append(product('Biscuits', 1, Point(x=4.0, y=5.0, z=0.0)))
-        self.items.append(product('Tissue', 1, Point(x=5.0, y=6.0, z=0.0)))
+        self.items.append(product('bottled water', 1, Point(x=1.0, y=2.0)))
+        self.items.append(product('milk', 1, Point(x=2.0, y=3.0)))
+        self.items.append(product('dessert', 1, Point(x=3.0, y=4.0)))
+        self.items.append(product('biscuit', 1, Point(x=4.0, y=5.0)))
+        self.items.append(product('tissue roll', 1, Point(x=5.0, y=6.0)))
 
         # Defining item relations (co-occurence score)
         score = {
-            'Bottled Water': {'Milk': 0.1178, 'Dessert': 0, 'Biscuits': 0, 'Tissue': 0},
-            'Milk': {'Bottled Water': 0.1178, 'Dessert': 0, 'Biscuits': 0, 'Tissue': 0},
-            'Dessert': {'Bottled Water': 0, 'Milk': 0, 'Biscuits': 0, 'Tissue': 0},
-            'Biscuits': {'Bottled Water': 0, 'Milk': 0, 'Dessert': 0, 'Tissue': 0},
-            'Tissue': {'Bottled Water': 0, 'Milk': 0, 'Dessert': 0, 'Biscuits': 0}
+            'bottled water': {'milk': 0.1178, 'Desserd': 0, 'biscuit': 0, 'tissue roll': 0},
+            'milk': {'bottled water': 0.1178, 'Desserd': 0, 'biscuit': 0, 'tissue roll': 0},
+            'Desserd': {'bottled water': 0, 'milk': 0, 'biscuit': 0, 'tissue roll': 0},
+            'biscuit': {'bottled water': 0, 'milk': 0, 'Desserd': 0, 'tissue roll': 0},
+            'tissue roll': {'bottled water': 0, 'milk': 0, 'Desserd': 0, 'biscuit': 0}
         }
 
 
@@ -46,7 +46,7 @@ class PredictionNode(Node):
         # Subscription to YOLOv8 subsystem
         self.create_subscription(
             String,
-            'held_items',
+            'detected_item',
             self.held_items_callback,
             10
         )
