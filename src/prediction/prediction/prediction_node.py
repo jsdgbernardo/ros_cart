@@ -21,19 +21,19 @@ class PredictionNode(Node):
         
         self.items = [] # list of item objects
 
-        self.items.append(product('bottled water', 1, Point(x=1.0, y=2.0)))
-        self.items.append(product('milk', 1, Point(x=2.0, y=3.0)))
-        self.items.append(product('dessert', 1, Point(x=3.0, y=4.0)))
-        self.items.append(product('biscuit', 1, Point(x=4.0, y=5.0)))
-        self.items.append(product('tissue roll', 1, Point(x=5.0, y=6.0)))
+        self.items.append(product('bottled water', 1, Point(x=-0.9238461256027222, y=2.690908432006836)))
+        self.items.append(product('milk', 1, Point(x=3.6315736770629883, y=2.4937195777893066)))
+        self.items.append(product('dessert', 1, Point(x=5.441387176513672, y=0.9294328689575195)))
+        self.items.append(product('biscuit', 1, Point(x=3.8366289138793945, y=-1.176401138305664)))
+        self.items.append(product('tissue roll', 1, Point(x=0.43349552154541016, y=0.72157883644104)))
 
         # Defining item relations (co-occurence score)
         score = {
-            'bottled water': {'milk': 0.1178, 'Desserd': 0, 'biscuit': 0, 'tissue roll': 0},
-            'milk': {'bottled water': 0.1178, 'Desserd': 0, 'biscuit': 0, 'tissue roll': 0},
-            'Desserd': {'bottled water': 0, 'milk': 0, 'biscuit': 0, 'tissue roll': 0},
-            'biscuit': {'bottled water': 0, 'milk': 0, 'Desserd': 0, 'tissue roll': 0},
-            'tissue roll': {'bottled water': 0, 'milk': 0, 'Desserd': 0, 'biscuit': 0}
+            'bottled water': {'milk': 0.1178, 'dessert': 0.0176, 'biscuit': 0.0474, 'tissue roll': 0.0033},
+            'milk': {'bottled water': 0.0453, 'dessert': 0.0152, 'biscuit': 0.041, 'tissue roll': 0.0008},
+            'dessert': {'bottled water': 0.0453, 'milk': 0.102, 'biscuit': 0.034, 'tissue roll': 0},
+            'biscuit': {'bottled water': 0.0556, 'milk': 0.1253, 'dessert': 0.0155, 'tissue roll': 0.0026},
+            'tissue roll': {'bottled water': 0.10, 'milk': 0.0667, 'dessert': 0, 'biscuit': 0.0667}
         }
 
 
