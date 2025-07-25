@@ -36,7 +36,6 @@ class PredictionNode(Node):
             'tissue roll': {'bottled water': 0.10, 'milk': 0.0667, 'dessert': 0, 'biscuit': 0.0667}
         }
 
-
         # Converting score data to a DataFrame
         self.df = pd.DataFrame.from_dict(score, orient='index')
         np.fill_diagonal(self.df.values, 0)
