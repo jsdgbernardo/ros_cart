@@ -53,12 +53,21 @@ class PredictionNode(Node):
         # Service client for ComputePathToPose
         self._action_client = ActionClient(self, ComputePathToPose, 'compute_path_to_pose')
 
-        # Subscription to AMCL pose
+        # Subscription to AMCL pose (robot)
         self.current_pose = None
         self.create_subscription(
             PoseWithCovarianceStamped,
             '/amcl_pose',
             self.pose_callback,
+            10
+        )
+
+        # Subscription to user pose
+        self.user_pose = None
+        self.create_subscription(
+            PoseStamped,
+            '/user/pose',
+            self.user_pose_callback,
             10
         )
 
@@ -174,8 +183,12 @@ class PredictionNode(Node):
         return sum(scores) / len(scores)
 
     def pose_callback(self, msg):
-        self.current_pose = msg.pose.pose
+        self.current_pose = msg.pose
         self.get_logger().info(f'Current pose updated: {self.current_pose.position.x}, {self.current_pose.position.y}')
+
+    def user_pose_callback(self, msg):
+        self.user_pose = msg.pose
+        self.get_logger().info(f'User pose updated: {self.user_pose.position.x}, {self.user_pose.position.y}')
 
     # Compute the path length to a given (x, y) coordinate
     def compute_path_to(self, x, y):
@@ -220,29 +233,57 @@ class PredictionNode(Node):
         self.head_yaw = msg.data
         self.get_logger().info(f'Head yaw updated: {self.head_yaw}')
 
-    def compute_gaze_alignment_score_with_path(self, item):
-        if self.head_yaw is None or self.current_pose is None:
+    def compute_gaze_alignment_score_with_path(self, item, num_waypoints=3, decay_rate=0.7):
+        if self.head_yaw is None or self.user_pose is None or not hasattr(item, 'path'):
             return 0.0
 
-        path, _ = self.compute_path_to(item.coordinates.x, item.coordinates.y)
-        if path is None or len(path.poses) < 2:
+        # User position
+        ux, uy = self.user_pose.pose.position.x, self.user_pose.pose.position.y
+        user_pos = np.array([ux, uy])
+
+        # Get up to N waypoints
+        path_points = item.path.poses
+        if len(path_points) < num_waypoints:
+            num_waypoints = len(path_points)
+        if num_waypoints == 0:
             return 0.0
 
-        poses = path.poses
-        dx = poses[1].pose.position.x - poses[0].pose.position.x
-        dy = poses[1].pose.position.y - poses[0].pose.position.y
-        path_vector = np.array([dx, dy])
-        norm = np.linalg.norm(path_vector)
-        if norm == 0:
-            return 0.0
-        path_vector = path_vector / norm
+        # Weighted average direction vector
+        weighted_sum = np.zeros(2)
+        total_weight = 0.0
 
+        for i in range(num_waypoints):
+            px = path_points[i].pose.position.x
+            py = path_points[i].pose.position.y
+            vector = np.array([px, py]) - user_pos
+            norm = np.linalg.norm(vector)
+            if norm == 0:
+                continue
+
+            unit_vector = vector / norm
+            weight = decay_rate ** i  # Exponential decay
+            weighted_sum += unit_vector * weight
+            total_weight += weight
+
+        if total_weight == 0.0:
+            return 0.0
+
+        avg_direction = weighted_sum / total_weight
+        avg_direction /= np.linalg.norm(avg_direction)  # normalize
+
+        # Gaze vector from head yaw
         yaw_rad = math.radians(self.head_yaw)
         gaze_vector = np.array([math.cos(yaw_rad), math.sin(yaw_rad)])
 
-        dot = np.dot(gaze_vector, path_vector)
-        return max(0.0, dot)
+        # Compute alignment
+        dot = np.dot(gaze_vector, avg_direction)
+        score = max(0.0, dot)  # Clamp to [0, 1]
 
+        self.get_logger().info(
+            f"[Gaze Alignment] Gaze: {gaze_vector}, AvgPath: {avg_direction}, Score: {score:.2f}"
+        )
+
+        return score
 
 def main(args=None):
     rclpy.init(args=args)
