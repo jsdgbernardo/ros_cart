@@ -45,7 +45,7 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_link
     odom_topic: /odom
-    bt_loop_duration: 10
+    bt_loop_duration: 1
     default_server_timeout: 20
     wait_for_service_timeout: 1000
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
@@ -141,7 +141,7 @@ controller_server:
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True
-      min_vel_x: 0.0
+      min_vel_x: 0.
       min_vel_y: 0.0
       max_vel_x: 0.26
       max_vel_y: 0.0
@@ -183,6 +183,7 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
+      transform_tolerance: 1.0
       update_frequency: 5.0
       publish_frequency: 2.0
       global_frame: odom
@@ -197,7 +198,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        inflation_radius: 0.3
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -226,6 +227,7 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
+      transform_tolerance: 1.0
       update_frequency: 1.0
       publish_frequency: 1.0
       global_frame: map

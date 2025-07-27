@@ -17,6 +17,14 @@ def generate_launch_description():
     pkg_path = get_package_share_directory('chassis')
     xacro_file = os.path.join(pkg_path, 'description', 'chassis.urdf.xacro')
 
+    static_tf_pub = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_transform_publisher',
+        output='screen',
+        arguments=['-0.12', '0', '0.13442', '0', '0', '0', 'base_link', 'lidar_link']
+    )
+
     robot_description_config = Command([
         PathJoinSubstitution([FindExecutable(name='xacro')]), ' ',
         xacro_file, ' ',
@@ -42,5 +50,6 @@ def generate_launch_description():
             'use_ros2_control',
             default_value='true',
             description='Enable ros2_control'),
+        static_tf_pub,
         node_robot_state_publisher
     ])
