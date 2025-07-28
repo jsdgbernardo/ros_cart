@@ -140,10 +140,12 @@
         </xacro:inertial_sphere>
     </link>
 
+    <!-- LIDAR LINK -->
+
     <joint name="lidar_joint" type="fixed">
         <parent link="base_link"/>
         <child link="lidar_link"/>
-        <origin xyz="-0.12 0 0.13442" rpy="0 0 0"/>
+        <origin xyz="-0.06 0 0.13442" rpy="0 0 0"/>
     </joint>
 
     <link name="lidar_link">
@@ -157,5 +159,33 @@
             <origin xyz="0 0 0" rpy="0 0 0"/>
         </xacro:inertial_cylinder>
     </link>
+
+    <!-- CAMERA LINK -->
+
+     <joint name="camera_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera_link"/>
+        <origin xyz="-0.11 0.05 0.09" rpy="0 0.785398 0"/>
+    </joint>
+
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="0.0076 0.1574 0.0758"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <!-- <xacro:inertial_box mass="0.2" x="0.0076" y="0.1574" z="0.0758">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box> -->
+    </link>
+
+    <joint name="camera_optical_joint" type="fixed">
+        <parent link="camera_link"/>
+        <child link="camera_optical_link"/>
+        <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    </joint>
+
+    <link name="camera_optical_link"></link>
 
 </robot>

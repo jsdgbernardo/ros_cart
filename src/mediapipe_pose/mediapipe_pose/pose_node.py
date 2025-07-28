@@ -1,9 +1,10 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage
-from geometry_msgs.msg import Point, PoseStamped, Quaternion, PoointStamped
+from geometry_msgs.msg import Point, PoseStamped, Quaternion, PointStamped
 from std_msgs.msg import Float32
 from sensor_msgs.msg import LaserScan
+import tf2_geometry_msgs
 import tf2_ros
 import cv2
 import mediapipe as mp
@@ -64,6 +65,9 @@ class PoseEstimationNode(Node):
         self.latest_scan = msg
     
     def image_callback(self, msg):
+
+        # msg.header.frame_id = 'camera_optical_link'
+
         # Decode the compressed JPEG to OpenCV image
         np_arr = np.frombuffer(msg.data, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -136,6 +140,10 @@ class PoseEstimationNode(Node):
                 nose_angle_robot += 2 * math.pi
 
             scan = self.latest_scan
+            if scan is None:
+                self.get_logger().warn("No LaserScan data received yet.")
+                return
+
             angle_min = scan.angle_min
             angle_max = scan.angle_max
             angle_increment = scan.angle_increment
@@ -144,15 +152,25 @@ class PoseEstimationNode(Node):
                 self.get_logger().warn(f"Nose angle {math.degrees(nose_angle_robot):.1f}° out of LiDAR range")
                 return
 
-            index = int((nose_angle_robot - angle_min) / angle_inc)
+            index = int((nose_angle_robot - angle_min) / angle_increment)
             if index < 0 or index >= len(scan.ranges):
                 self.get_logger().warn("LiDAR index out of range")
                 return
 
-            depth = scan.ranges[index]
-            if math.isinf(depth) or math.isnan(depth) or depth <= 0.0:
-                self.get_logger().warn("Invalid LiDAR depth")
+            window = 5
+            best_depth = None
+            for offset in range(-window, window + 1):
+                i = index + offset
+                if 0 <= i < len(scan.ranges):
+                    d = scan.ranges[i]
+                    if not math.isinf(d) and not math.isnan(d) and d > 0.0:
+                        best_depth = d
+                        break
+
+            if best_depth is None:
+                self.get_logger().warn(f"No valid LiDAR depth near index {index} for angle {math.degrees(nose_angle_robot):.1f}°")
                 return
+            depth = best_depth
 
             # Calculate focal length in pixels
             fx = (self.camera_width / 2) / math.tan(math.radians(self.camera_h_fov_deg) / 2)
@@ -188,6 +206,8 @@ class PoseEstimationNode(Node):
             body_angle_rad = np.deg2rad(body_angle)
             pose_msg.pose.orientation = self.yaw_to_quaternion(body_angle_rad)
             self.pose_pub.publish(pose_msg)
+
+            self.get_logger().info(f'User Position: x={person_map.point.x:.2f}, y={person_map.point.y:.2f}')
 
 
         except IndexError:
