@@ -13,10 +13,13 @@
   - Xacro
   - MediaPipe
   - YOLOv8
-  - Tf2, Tf2 Tools
+  - Tf2, Tf2 Tools, Tf2 Geometry
+  - Joint State Publisher (and GUI)
+  - Robot State Publisher
 - New Gazebo
 - CycloneDDS
 - Colcon
+- Xrdp (for remote desktop connection)
 - Pandas (for dataframes)
 ## Issues
 - **Raspberry Pi limitations**: May cause transform delays due to low computing power.
