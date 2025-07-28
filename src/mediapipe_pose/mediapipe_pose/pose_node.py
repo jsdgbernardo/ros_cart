@@ -130,14 +130,19 @@ class PoseEstimationNode(Node):
             self.get_logger().info(f'Body Angle: {body_angle:.1f}°')
 
             # ----- Estimate user position ------
-            nose_angle_camera = ((x / self.camera_width) - 0.5) * math.radians(self.camera_h_fov_deg)
-            nose_angle_robot = nose_angle_camera + math.pi
+            mid_x = (left_shoulder.x + right_shoulder.x) / 2.0
+            mid_y = (left_shoulder.y + right_shoulder.y) / 2.0
+            mid_z = (left_shoulder.z + right_shoulder.z) / 2.0
+            x, y, z = mid_x * w, mid_y * h, mid_z
+            
+            shoulder_angle_camera = ((x / self.camera_width) - 0.5) * math.radians(self.camera_h_fov_deg)
+            shoulder_angle_robot = shoulder_angle_camera + math.pi
 
             # Normalize the angle to [-pi, pi]
-            if nose_angle_robot > math.pi:
-                nose_angle_robot -= 2 * math.pi
-            elif nose_angle_robot < -math.pi:
-                nose_angle_robot += 2 * math.pi
+            if shoulder_angle_robot > math.pi:
+                shoulder_angle_robot -= 2 * math.pi
+            elif shoulder_angle_robot < -math.pi:
+                shoulder_angle_robot += 2 * math.pi
 
             scan = self.latest_scan
             if scan is None:
@@ -148,11 +153,11 @@ class PoseEstimationNode(Node):
             angle_max = scan.angle_max
             angle_increment = scan.angle_increment
 
-            if nose_angle_robot < angle_min or nose_angle_robot > angle_max:
-                self.get_logger().warn(f"Nose angle {math.degrees(nose_angle_robot):.1f}° out of LiDAR range")
+            if shoulder_angle_robot < angle_min or shoulder_angle_robot > angle_max:
+                self.get_logger().warn(f"Shoulder angle {math.degrees(shoulder_angle_robot):.1f}° out of LiDAR range")
                 return
 
-            index = int((nose_angle_robot - angle_min) / angle_increment)
+            index = int((shoulder_angle_robot - angle_min) / angle_increment)
             if index < 0 or index >= len(scan.ranges):
                 self.get_logger().warn("LiDAR index out of range")
                 return
@@ -168,7 +173,7 @@ class PoseEstimationNode(Node):
                         break
 
             if best_depth is None:
-                self.get_logger().warn(f"No valid LiDAR depth near index {index} for angle {math.degrees(nose_angle_robot):.1f}°")
+                self.get_logger().warn(f"No valid LiDAR depth near index {index} for angle {math.degrees(shoulder_angle_robot):.1f}°")
                 return
             depth = best_depth
 
@@ -186,14 +191,20 @@ class PoseEstimationNode(Node):
 
             person_camera = PointStamped()
             person_camera.header.frame_id = 'camera_link'  # camera frame
-            person_camera.header.stamp = self.get_clock().now().to_msg()
+            # person_camera.header.stamp = rclpy.time.Time()
             person_camera.point.x = X_cam
             person_camera.point.y = Y_cam
             person_camera.point.z = Z_cam
 
             # Transform to map frame
             try:
-                person_map = self.tf_buffer.transform(person_camera, 'map', timeout=rclpy.duration.Duration(seconds=1.0))
+                transform = self.tf_buffer.lookup_transform(
+                    'map',
+                    person_camera.header.frame_id,  
+                    rclpy.time.Time(),  # time=0 → latest
+                    timeout=rclpy.duration.Duration(seconds=1.0)   
+                )
+                person_map = tf2_geometry_msgs.do_transform_point(person_camera, transform)
             except Exception as e:
                 self.get_logger().warn(f"TF transform failed: {e}")
                 return
