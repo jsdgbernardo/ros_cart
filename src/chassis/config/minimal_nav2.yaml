@@ -1,0 +1,44 @@
+amcl:
+  ros__parameters:
+    use_sim_time: false
+
+global_costmap:
+  ros__parameters:
+    global_frame: map
+    robot_base_frame: base_link
+    update_frequency: 1.0
+    publish_frequency: 1.0
+    transform_tolerance: 0.5
+    resolution: 0.05
+    rolling_window: false
+    static_map: true
+    plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+
+    # Disable obstacle and inflation layers to ignore obstacles
+    obstacle_layer:
+      enabled: false
+    inflation_layer:
+      enabled: false
+
+planner_server:
+  ros__parameters:
+    use_sim_time: false
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 10.0         # high tolerance
+      allow_unknown: true
+      use_astar: true
+
+controller_server:
+  ros__parameters:
+    use_sim_time: false
+    # Disable controllers since we only want planning
+    controller_plugins: []
+
+behavior_server:
+  ros__parameters:
+    use_sim_time: false
+    # Disable BT (optional)
+    default_behavior_tree: ""
+

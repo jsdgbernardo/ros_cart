@@ -3,8 +3,9 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 from nav2_msgs.action import ComputePathToPose
 from nav_msgs.msg import Path
-from geometry_msgs.msg import PoseStamped, Point, PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseStamped, Point, PoseWithCovarianceStamped, Pose
 from std_msgs.msg import String, Float32
+from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy
 import math
 import time
 import numpy as np
@@ -15,7 +16,7 @@ class product():
         self.name = name
         self.probability = probability
         self.coordinates = coordinates
-        self.path = None  # Store path for gaze alignment
+        self.path = None
 
 class PredictionNode(Node):
     def __init__(self):
@@ -23,13 +24,14 @@ class PredictionNode(Node):
         
         self.items = [] # list of item objects
 
-        self.items.append(product('bottled water', 1, Point(x=-0.9238461256027222, y=2.690908432006836)))
+        # Corrected: removed distance argument from product instantiation
+        self.items.append(product('bottled water', 1, Point(x=-1.1708265542984009, y=1.9727896451950073)))
         self.items.append(product('milk', 1, Point(x=3.6315736770629883, y=2.4937195777893066)))
         self.items.append(product('dessert', 1, Point(x=5.441387176513672, y=0.9294328689575195)))
         self.items.append(product('biscuit', 1, Point(x=3.8366289138793945, y=-1.176401138305664)))
         self.items.append(product('tissue roll', 1, Point(x=0.43349552154541016, y=0.72157883644104)))
 
-        # Defining item relations (co-occurence score)
+        # Defining item relations (co-occurrence score)
         score = {
             'bottled water': {'milk': 0.1178, 'dessert': 0.0176, 'biscuit': 0.0474, 'tissue roll': 0.0033},
             'milk': {'bottled water': 0.0453, 'dessert': 0.0152, 'biscuit': 0.041, 'tissue roll': 0.0008},
@@ -43,7 +45,7 @@ class PredictionNode(Node):
         np.fill_diagonal(self.df.values, 0)
 
         self.held_items = [] # list of held item objects
-        
+
         # Subscription to YOLOv8 subsystem
         self.create_subscription(
             String,
@@ -81,6 +83,17 @@ class PredictionNode(Node):
             self.head_yaw_callback,
             10
         )
+
+        # Latest path storage
+        self.latest_path = None
+        self.latest_path_goal = None  # To track which goal this path corresponds to
+
+        self.create_subscription(
+            Path,
+            '/plan',
+            self.path_callback,
+            10
+        )
         
         # # Publish navigational goal
         # self.goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
@@ -89,46 +102,106 @@ class PredictionNode(Node):
         self.path_pub = self.create_publisher(Path, 'best_path', 10)
 
         # Create a timer to periodically compute probabilities
-        self.timer = self.create_timer(1.0, self.compute_probability)
+        self.timer = self.create_timer(5.0, self.compute_probability)
+
+         # Define manual paths (waypoints) for each item - temporarily starts at (0,0)
+        self.paths = {
+            'bottled water': [
+                (0.0, 0.0),
+                (-1.17, 1.97)  
+            ],
+            'milk': [
+                (0.0, 0.0),
+                (-0.5, 1.8),
+                (3.63, 2.49)
+            ],
+            'dessert': [
+                (0.0, 0.0),
+                (4.91, 0.0),
+                (5.44, 0.93)
+            ],
+            'biscuit': [
+                (0.0, 0.0),
+                (3.83, -1.17)
+            ],
+            'tissue roll': [
+                (0.0, 0.0),
+                (0.4, 0.7)
+            ]
+        }
+
+    def create_manual_path_with_user_start(self, points, frame='map'):
+
+        path = Path()
+        path.header.frame_id = frame
+        path.header.stamp = self.get_clock().now().to_msg()
+
+        # Determine user start position
+        if self.user_pose is not None:
+            user_x = self.user_pose.position.x
+            user_y = self.user_pose.position.y
+        else:
+            user_x, user_y = points[0]  # fallback to first point if user_pose unknown
+
+        # Insert user position as first waypoint
+        first_point = (user_x, user_y)
+        waypoints = [first_point] + points[1:]  # replace original first waypoint with user position
+
+        for x, y in waypoints:
+            pose = PoseStamped()
+            pose.header.frame_id = frame
+            pose.header.stamp = path.header.stamp
+            pose.pose.position.x = x
+            pose.pose.position.y = y
+            pose.pose.position.z = 0.0
+            pose.pose.orientation.w = 1.0
+            path.poses.append(pose)
+
+        return path
 
     def compute_probability(self):
 
+        # Assign these paths to items, but shift first waypoint to user position if known
+        for item in self.items:
+            if item.name in self.paths:
+                item.path = self.create_manual_path_with_user_start(self.paths[item.name])
+
         self.get_logger().info('Computing probabilities...')
 
-        path_lengths = {}
         total_length = 0.0
-        paths = {}
         priors = {}
         likelihoods = {}
 
-        valid_items = []
+        # valid_items = []
 
-        # Compute path lengths for each item
-        for item in self.items:
-            path, length = self.compute_path_to(item.coordinates.x, item.coordinates.y)
-            if path is not None and length != float('inf'):
-                paths[item.name] = path
-                path_lengths[item.name] = length
-                item.path = path  # Store for gaze alignment
-                valid_items.append(item)
-                total_length += length
-            else:
-                item.path = None
+        # # Filter items with valid paths
+        # for item in self.items:
+        #     if item.path is not None and len(item.path.poses) > 1:
+        #         valid_items.append(item)
+
+        path_lengths = [self.calculate_path_length(item.path) for item in self.items]
+        max_length = max(path_lengths)
+        min_length = min(path_lengths)
 
         # Compute priors and likelihoods
-        for item in valid_items:
+        for item, length in zip(self.items, path_lengths):
             priors[item.name] = item.probability
             held_prob = self.held_items_likelihood(item)
-            path_prob = path_lengths[item.name] / total_length if total_length > 0 else 1.0
-            gaze_prob = self.compute_gaze_alignment_score_with_path(item)
+            path_prob = 1.0 - (length - min_length) / (max_length - min_length + 1e-6)
+            gaze_prob = self.compute_gaze_alignment_score_with_path(item) 
+            gaze_prob = 1 if gaze_prob == 0 else gaze_prob
 
             likelihoods[item.name] = held_prob * path_prob * gaze_prob
-        
+            # self.get_logger().info(
+            #     # f'Item: {item.name}, Held Likelihood: {held_prob:.4f}, Path Likelihood: {path_prob:.4f}, Gaze Likelihood: {gaze_prob:.4f}'
+            #     # f'Item: {item.name}, Gaze Likelihood: {gaze_prob:.4f}'
+            # )
+
         # Normalize likelihoods
         evidence = sum(likelihoods[name] * priors[name] for name in likelihoods)
 
         # Compute posterior probabilities
-        for item in valid_items:
+        for item in self.items:
             numerator = likelihoods[item.name] * priors[item.name]
             posterior = numerator / evidence if evidence > 0 else 0.0
             item.probability = posterior
@@ -136,8 +209,8 @@ class PredictionNode(Node):
         self.get_logger().info('Probabilities computed.')
 
         # Find the item with the highest probability
-        if valid_items:
-            best_item = max(valid_items, key=lambda x: x.probability)
+        if self.items:
+            best_item = max(self.items, key=lambda x: x.probability)
             best_path = best_item.path
 
             # Publish the path
@@ -146,22 +219,11 @@ class PredictionNode(Node):
             nav_path.header.stamp = self.get_clock().now().to_msg()
             nav_path.poses = best_path.poses
 
+
             self.path_pub.publish(nav_path)
             self.get_logger().info(f'Published best path to item: {best_item.name} with probability: {best_item.probability:.4f}')
         else:
             self.get_logger().warn("No valid paths to any items. Nothing published.")
-
-        # # Wait for the action server to be ready
-        # self.get_logger().info('Waiting for ComputePathToPose action server...')
-        # self._action_client.wait_for_server()
-        # self.get_logger().info('ComputePathToPose action server is ready.')
-
-        # # Send goal and attach callbacks
-        # future = self._action_client.send_goal_async(
-        #     goal_msg,
-        #     feedback_callback=self.feedback_callback
-        # )
-        # future.add_done_callback(self.goal_response_callback)
 
     def get_relation(self, item1, item2):
         try:
@@ -178,7 +240,7 @@ class PredictionNode(Node):
 
     def held_items_likelihood(self, item, alpha=1.0):
         # Compute the likelihood of the held items given the item
-        self.get_logger().info(f'Computing held items likelihood for {item.name}...')
+        # self.get_logger().info(f'Computing held items likelihood for {item.name}...')
         if len(self.held_items) == 0:
             return 1.0
 
@@ -205,58 +267,22 @@ class PredictionNode(Node):
 
     def pose_callback(self, msg):
         self.current_pose = msg.pose.pose
-        # self.get_logger().info(f'Current pose updated: {self.current_pose.position.x}, {self.current_pose.position.y}')
+        self.get_logger().info(f'Current pose updated: {self.current_pose.position.x}, {self.current_pose.position.y}')
 
     def user_pose_callback(self, msg):
         self.user_pose = msg.pose
         # self.get_logger().info(f'User pose updated: {self.user_pose.position.x}, {self.user_pose.position.y}')
 
-    # Compute the path length to a given (x, y) coordinate
-    def compute_path_to(self, x, y):
-        self.get_logger().info(f'Computing path to ({x}, {y})...')
-        goal_pose = PoseStamped()
-        goal_pose.header.frame_id = 'map'
-        goal_pose.pose.position = Point(x=x, y=y, z=0.0)
-        goal_pose.pose.orientation.w = 1.0
-
-        goal_msg = ComputePathToPose.Goal()
-        goal_msg.goal = goal_pose
-        
-        # if self.current_pose is not None:
-        #     goal_msg.start.header.frame_id = 'map'
-        #     goal_msg.start.pose = self.current_pose
-        # else:
-        #     self.get_logger().warn("Current robot pose not available.")
-        #     return None, float('inf')
-        # Wait for server
-        self.get_logger().info('Waiting for ComputePathToPose action server...')
-        self._action_client.wait_for_server()
-
-        # Send goal
-        goal_future = self._action_client.send_goal_async(goal_msg)
-        rclpy.spin_until_future_complete(self, goal_future, timeout_sec=5.0)
-
-        # Get goal handle
-        goal_handle = goal_future.result()
-        if not goal_handle or not goal_handle.accepted:
-            self.get_logger().warn('ComputePathToPose goal rejected by planner.')
-            return None, float('inf')
-
-        # Wait for result
-        result_future = goal_handle.get_result_async()
-        rclpy.spin_until_future_complete(self, result_future, timeout_sec=5.0)
-
-        # Get path
-        result = result_future.result()
-        if result:
-            path = result.result.path
-            length = self.calculate_path_length(path)
-            return path, length
+    def path_callback(self, msg):
+        # Save latest path and goal position for matching
+        self.get_logger().info(f'Latest path received with {len(msg.poses)} poses.')
+        self.latest_path = msg
+        if len(msg.poses) > 0:
+            last_pose = msg.poses[-1].pose.position
+            self.latest_path_goal = (last_pose.x, last_pose.y)
         else:
-            self.get_logger().warn('Planner did not return a valid path.')
-            return None, float('inf')
-
-
+            self.latest_path_goal = None
+    
     def calculate_path_length(self, path):
         total = 0.0
         poses = path.poses
@@ -271,6 +297,7 @@ class PredictionNode(Node):
         # self.get_logger().info(f'Head yaw updated: {self.head_yaw}')
 
     def compute_gaze_alignment_score_with_path(self, item, num_waypoints=3, decay_rate=0.7):
+        # Return 0 if necessary data is missing
         if self.head_yaw is None or self.user_pose is None or not hasattr(item, 'path') or item.path is None:
             return 0.0
 
@@ -298,7 +325,7 @@ class PredictionNode(Node):
                 continue
 
             unit_vector = vector / norm
-            weight = decay_rate ** i  # Exponential decay
+            weight = decay_rate ** i  # Exponential decay weight
             weighted_sum += unit_vector * weight
             total_weight += weight
 
@@ -308,19 +335,20 @@ class PredictionNode(Node):
         avg_direction = weighted_sum / total_weight
         avg_direction /= np.linalg.norm(avg_direction)  # normalize
 
-        # Gaze vector from head yaw
+        # Gaze vector from head yaw (assuming yaw in degrees)
         yaw_rad = math.radians(self.head_yaw)
         gaze_vector = np.array([math.cos(yaw_rad), math.sin(yaw_rad)])
 
-        # Compute alignment
+        # Compute alignment (dot product)
         dot = np.dot(gaze_vector, avg_direction)
         score = max(0.0, dot)  # Clamp to [0, 1]
 
-        self.get_logger().info(
-            f"[Gaze Alignment] Gaze: {gaze_vector}, AvgPath: {avg_direction}, Score: {score:.2f}"
-        )
+        # self.get_logger().info(
+        #     f"[Gaze Alignment] Gaze: {gaze_vector}, AvgPath: {avg_direction}, Score: {score:.2f}"
+        # )
 
         return score
+
 
 def main(args=None):
     rclpy.init(args=args)

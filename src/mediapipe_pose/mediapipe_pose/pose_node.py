@@ -192,8 +192,8 @@ class PoseEstimationNode(Node):
             person_camera = PointStamped()
             person_camera.header.frame_id = 'camera_link'  # camera frame
             # person_camera.header.stamp = rclpy.time.Time()
-            person_camera.point.x = X_cam
-            person_camera.point.y = Y_cam
+            person_camera.point.x = -X_cam
+            person_camera.point.y = -Y_cam
             person_camera.point.z = Z_cam
 
             # Transform to map frame
