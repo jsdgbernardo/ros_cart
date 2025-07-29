@@ -228,22 +228,34 @@ class PredictionNode(Node):
         # else:
         #     self.get_logger().warn("Current robot pose not available.")
         #     return None, float('inf')
-
-        # Wait for the action server to be ready
+        # Wait for server
         self.get_logger().info('Waiting for ComputePathToPose action server...')
         self._action_client.wait_for_server()
-        future = self._action_client.send_goal_async(goal_msg)
 
-        rclpy.spin_until_future_complete(self, future, timeout_sec=5.0)
-        self.get_logger().info('Path computation request sent.')
+        # Send goal
+        goal_future = self._action_client.send_goal_async(goal_msg)
+        rclpy.spin_until_future_complete(self, goal_future, timeout_sec=5.0)
 
-        if future.result() is not None:
-            path = future.result().path
+        # Get goal handle
+        goal_handle = goal_future.result()
+        if not goal_handle or not goal_handle.accepted:
+            self.get_logger().warn('ComputePathToPose goal rejected by planner.')
+            return None, float('inf')
+
+        # Wait for result
+        result_future = goal_handle.get_result_async()
+        rclpy.spin_until_future_complete(self, result_future, timeout_sec=5.0)
+
+        # Get path
+        result = result_future.result()
+        if result:
+            path = result.result.path
             length = self.calculate_path_length(path)
             return path, length
         else:
-            self.get_logger().warn('Nav2 path service failed or timed out.')
+            self.get_logger().warn('Planner did not return a valid path.')
             return None, float('inf')
+
 
     def calculate_path_length(self, path):
         total = 0.0
