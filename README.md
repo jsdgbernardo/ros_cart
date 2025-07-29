@@ -4,6 +4,7 @@
 - ROS2 Humble (due to more tutorials online, and a much more stable version)
 - CycloneDDS (apparently is better than the default, FastDDS)
 - Colcon
+- `.bashrc`: Add source and install shortcuts 
 - `./src/mediapipe_cam`: Edit IP address to match phone's IP
 ## Downloaded files
 - ROS2 is better supported with **Linux**

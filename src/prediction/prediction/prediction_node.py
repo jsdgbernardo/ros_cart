@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
 from nav2_msgs.action import ComputePathToPose
+from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, Point, PoseWithCovarianceStamped
 from std_msgs.msg import String, Float32
 import math
@@ -14,6 +15,7 @@ class product():
         self.name = name
         self.probability = probability
         self.coordinates = coordinates
+        self.path = None  # Store path for gaze alignment
 
 class PredictionNode(Node):
     def __init__(self):
@@ -80,8 +82,11 @@ class PredictionNode(Node):
             10
         )
         
-        # Publish navigational goal
-        self.goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
+        # # Publish navigational goal
+        # self.goal_pub = self.create_publisher(PoseStamped, '/goal_pose', 10)
+
+        # Publish path to the item with the highest probability
+        self.path_pub = self.create_publisher(Path, 'best_path', 10)
 
         # Create a timer to periodically compute probabilities
         self.timer = self.create_timer(1.0, self.compute_probability)
@@ -96,13 +101,22 @@ class PredictionNode(Node):
         priors = {}
         likelihoods = {}
 
+        valid_items = []
+
+        # Compute path lengths for each item
         for item in self.items:
             path, length = self.compute_path_to(item.coordinates.x, item.coordinates.y)
-            paths[item.name] = path
-            path_lengths[item.name] = length
-            total_length += length
+            if path is not None and length != float('inf'):
+                paths[item.name] = path
+                path_lengths[item.name] = length
+                item.path = path  # Store for gaze alignment
+                valid_items.append(item)
+                total_length += length
+            else:
+                item.path = None
 
-        for item in self.items:
+        # Compute priors and likelihoods
+        for item in valid_items:
             priors[item.name] = item.probability
             held_prob = self.held_items_likelihood(item)
             path_prob = path_lengths[item.name] / total_length if total_length > 0 else 1.0
@@ -110,38 +124,44 @@ class PredictionNode(Node):
 
             likelihoods[item.name] = held_prob * path_prob * gaze_prob
         
+        # Normalize likelihoods
         evidence = sum(likelihoods[name] * priors[name] for name in likelihoods)
 
-        for item in self.items:
+        # Compute posterior probabilities
+        for item in valid_items:
             numerator = likelihoods[item.name] * priors[item.name]
             posterior = numerator / evidence if evidence > 0 else 0.0
             item.probability = posterior
 
-        best_item = max(self.items, key=lambda x: x.probability)
+        self.get_logger().info('Probabilities computed.')
 
-        goal_msg = ComputePathToPose.Goal()
-        goal_pose = PoseStamped()
-        goal_pose.header.frame_id = 'map'
-        goal_pose.header.stamp = self.get_clock().now().to_msg()
-        goal_pose.pose.position = best_item.coordinates
-        goal_pose.pose.orientation.w = 1.0
+        # Find the item with the highest probability
+        if valid_items:
+            best_item = max(valid_items, key=lambda x: x.probability)
+            best_path = best_item.path
 
-        goal_msg.goal = goal_pose
-        goal_msg.planner_id = ''
-        goal_msg.use_start = False
+            # Publish the path
+            nav_path = Path()
+            nav_path.header.frame_id = 'map'
+            nav_path.header.stamp = self.get_clock().now().to_msg()
+            nav_path.poses = best_path.poses
 
-        # Wait for the action server to be ready
-        self.get_logger().info('Waiting for ComputePathToPose action server...')
-        self._action_client.wait_for_server()
-        self.get_logger().info('ComputePathToPose action server is ready.')
+            self.path_pub.publish(nav_path)
+            self.get_logger().info(f'Published best path to item: {best_item.name} with probability: {best_item.probability:.4f}')
+        else:
+            self.get_logger().warn("No valid paths to any items. Nothing published.")
 
-        # Send goal and attach callbacks
-        future = self._action_client.send_goal_async(
-            goal_msg,
-            feedback_callback=self.feedback_callback
-        )
-        future.add_done_callback(self.goal_response_callback)
-        self.get_logger().info(f'Best item: {best_item.name} with probability: {best_item.probability:.4f}')
+        # # Wait for the action server to be ready
+        # self.get_logger().info('Waiting for ComputePathToPose action server...')
+        # self._action_client.wait_for_server()
+        # self.get_logger().info('ComputePathToPose action server is ready.')
+
+        # # Send goal and attach callbacks
+        # future = self._action_client.send_goal_async(
+        #     goal_msg,
+        #     feedback_callback=self.feedback_callback
+        # )
+        # future.add_done_callback(self.goal_response_callback)
 
     def get_relation(self, item1, item2):
         try:
@@ -158,6 +178,7 @@ class PredictionNode(Node):
 
     def held_items_likelihood(self, item, alpha=1.0):
         # Compute the likelihood of the held items given the item
+        self.get_logger().info(f'Computing held items likelihood for {item.name}...')
         if len(self.held_items) == 0:
             return 1.0
 
@@ -183,15 +204,16 @@ class PredictionNode(Node):
         return sum(scores) / len(scores)
 
     def pose_callback(self, msg):
-        self.current_pose = msg.pose
-        self.get_logger().info(f'Current pose updated: {self.current_pose.position.x}, {self.current_pose.position.y}')
+        self.current_pose = msg.pose.pose
+        # self.get_logger().info(f'Current pose updated: {self.current_pose.position.x}, {self.current_pose.position.y}')
 
     def user_pose_callback(self, msg):
         self.user_pose = msg.pose
-        self.get_logger().info(f'User pose updated: {self.user_pose.position.x}, {self.user_pose.position.y}')
+        # self.get_logger().info(f'User pose updated: {self.user_pose.position.x}, {self.user_pose.position.y}')
 
     # Compute the path length to a given (x, y) coordinate
     def compute_path_to(self, x, y):
+        self.get_logger().info(f'Computing path to ({x}, {y})...')
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
         goal_pose.pose.position = Point(x=x, y=y, z=0.0)
@@ -200,17 +222,20 @@ class PredictionNode(Node):
         goal_msg = ComputePathToPose.Goal()
         goal_msg.goal = goal_pose
         
-        if self.current_pose is not None:
-            goal_msg.start.header.frame_id = 'map'
-            goal_msg.start.pose = self.current_pose
-        else:
-            self.get_logger().warn("Current robot pose not available.")
-            return None, float('inf')
+        # if self.current_pose is not None:
+        #     goal_msg.start.header.frame_id = 'map'
+        #     goal_msg.start.pose = self.current_pose
+        # else:
+        #     self.get_logger().warn("Current robot pose not available.")
+        #     return None, float('inf')
 
+        # Wait for the action server to be ready
+        self.get_logger().info('Waiting for ComputePathToPose action server...')
         self._action_client.wait_for_server()
         future = self._action_client.send_goal_async(goal_msg)
 
-        rclpy.spin_until_future_complete(self, future, timeout_sec=1.0)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=5.0)
+        self.get_logger().info('Path computation request sent.')
 
         if future.result() is not None:
             path = future.result().path
@@ -231,14 +256,14 @@ class PredictionNode(Node):
 
     def head_yaw_callback(self, msg):
         self.head_yaw = msg.data
-        self.get_logger().info(f'Head yaw updated: {self.head_yaw}')
+        # self.get_logger().info(f'Head yaw updated: {self.head_yaw}')
 
     def compute_gaze_alignment_score_with_path(self, item, num_waypoints=3, decay_rate=0.7):
-        if self.head_yaw is None or self.user_pose is None or not hasattr(item, 'path'):
+        if self.head_yaw is None or self.user_pose is None or not hasattr(item, 'path') or item.path is None:
             return 0.0
 
         # User position
-        ux, uy = self.user_pose.pose.position.x, self.user_pose.pose.position.y
+        ux, uy = self.user_pose.position.x, self.user_pose.position.y
         user_pos = np.array([ux, uy])
 
         # Get up to N waypoints
