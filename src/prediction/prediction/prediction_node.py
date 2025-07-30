@@ -35,9 +35,9 @@ class PredictionNode(Node):
         score = {
             'bottled water': {'milk': 0.1178, 'dessert': 0.0176, 'biscuit': 0.0474, 'tissue roll': 0.0033},
             'milk': {'bottled water': 0.0453, 'dessert': 0.0152, 'biscuit': 0.041, 'tissue roll': 0.0008},
-            'dessert': {'bottled water': 0.0453, 'milk': 0.102, 'biscuit': 0.034, 'tissue roll': 0},
+            'dessert': {'bottled water': 0.0453, 'milk': 0.102, 'biscuit': 0.034, 'tissue roll': 0.000000001},
             'biscuit': {'bottled water': 0.0556, 'milk': 0.1253, 'dessert': 0.0155, 'tissue roll': 0.0026},
-            'tissue roll': {'bottled water': 0.10, 'milk': 0.0667, 'dessert': 0, 'biscuit': 0.0667}
+            'tissue roll': {'bottled water': 0.10, 'milk': 0.0667, 'dessert': 0.000000001, 'biscuit': 0.0667}
         }
 
         # Converting score data to a DataFrame
@@ -68,6 +68,7 @@ class PredictionNode(Node):
 
         # Subscription to user pose
         self.user_pose = None
+        self.last_user_pose = None
         self.create_subscription(
             PoseStamped,
             '/user/pose',
@@ -102,7 +103,7 @@ class PredictionNode(Node):
         self.path_pub = self.create_publisher(Path, 'best_path', 10)
 
         # Create a timer to periodically compute probabilities
-        self.timer = self.create_timer(5.0, self.compute_probability)
+        self.timer = self.create_timer(1.0, self.compute_probability)
 
          # Define manual paths (waypoints) for each item - temporarily starts at (0,0)
         self.paths = {
@@ -112,12 +113,12 @@ class PredictionNode(Node):
             ],
             'milk': [
                 (0.0, 0.0),
-                (-0.5, 1.8),
+                # (-0.5, 1.8),
                 (3.63, 2.49)
             ],
             'dessert': [
                 (0.0, 0.0),
-                (4.91, 0.0),
+                # (4.91, 0.0),
                 (5.44, 0.93)
             ],
             'biscuit': [
@@ -136,12 +137,24 @@ class PredictionNode(Node):
         path.header.frame_id = frame
         path.header.stamp = self.get_clock().now().to_msg()
 
+        
+        counter = 0
+
         # Determine user start position
-        if self.user_pose is not None:
+        if self.user_pose is not None and counter < 5:
             user_x = self.user_pose.position.x
             user_y = self.user_pose.position.y
+            counter = 0
+            self.get_logger().info(f'User pose used: {user_x}, {user_y}')
+        elif self.current_pose is not None:
+            user_x = self.current_pose.position.x
+            user_y = self.current_pose.position.y
+            self.get_logger().info(f'Current pose used: {user_x}, {user_y}')
         else:
             user_x, user_y = points[0]  # fallback to first point if user_pose unknown
+
+        if self.user_pose == self.last_user_pose: 
+            counter += 1
 
         # Insert user position as first waypoint
         first_point = (user_x, user_y)
@@ -161,7 +174,7 @@ class PredictionNode(Node):
 
     def compute_probability(self):
 
-        # Assign these paths to items, but shift first waypoint to user position if known
+        # Shift first waypoint to user position or cart position
         for item in self.items:
             if item.name in self.paths:
                 item.path = self.create_manual_path_with_user_start(self.paths[item.name])
@@ -192,10 +205,10 @@ class PredictionNode(Node):
             gaze_prob = 1 if gaze_prob == 0 else gaze_prob
 
             likelihoods[item.name] = held_prob * path_prob * gaze_prob
-            # self.get_logger().info(
-            #     # f'Item: {item.name}, Held Likelihood: {held_prob:.4f}, Path Likelihood: {path_prob:.4f}, Gaze Likelihood: {gaze_prob:.4f}'
-            #     # f'Item: {item.name}, Gaze Likelihood: {gaze_prob:.4f}'
-            # )
+            self.get_logger().info(f'Item: {item.name}')
+            self.get_logger().info(f'Held Likelihood: {held_prob:.4f}')
+            self.get_logger().info(f'Path Likelihood: {path_prob:.4f}')
+            self.get_logger().info(f'Gaze Likelihood: {gaze_prob:.4f}')
 
         # Normalize likelihoods
         evidence = sum(likelihoods[name] * priors[name] for name in likelihoods)
@@ -205,6 +218,8 @@ class PredictionNode(Node):
             numerator = likelihoods[item.name] * priors[item.name]
             posterior = numerator / evidence if evidence > 0 else 0.0
             item.probability = posterior
+            if item in self.held_items:
+                item.probability *= 0.5
 
         self.get_logger().info('Probabilities computed.')
 
@@ -218,9 +233,16 @@ class PredictionNode(Node):
             nav_path.header.frame_id = 'map'
             nav_path.header.stamp = self.get_clock().now().to_msg()
             nav_path.poses = best_path.poses
-
-
             self.path_pub.publish(nav_path)
+
+            if nav_path.poses:
+                goal_msg = ComputePathToPose.Goal()
+                goal_msg.goal = nav_path.poses[-1]  # last point in path
+                goal_msg.goal.header.frame_id = 'map'
+                goal_msg.goal.header.stamp = self.get_clock().now().to_msg()
+
+                self._action_client.send_goal_async(goal_msg)
+
             self.get_logger().info(f'Published best path to item: {best_item.name} with probability: {best_item.probability:.4f}')
         else:
             self.get_logger().warn("No valid paths to any items. Nothing published.")
@@ -275,7 +297,7 @@ class PredictionNode(Node):
 
     def path_callback(self, msg):
         # Save latest path and goal position for matching
-        self.get_logger().info(f'Latest path received with {len(msg.poses)} poses.')
+        # self.get_logger().info(f'Latest path received with {len(msg.poses)} poses.')
         self.latest_path = msg
         if len(msg.poses) > 0:
             last_pose = msg.poses[-1].pose.position
